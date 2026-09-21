@@ -32,7 +32,14 @@ jobs:
           mkdir -p app/src/main/res/xml
           mkdir -p app/src/main/res/drawable
 
-          # 1. settings.gradle.kts
+          # 1. gradle.properties (Fixes AndroidX Error)
+          cat << 'EOF' > gradle.properties
+          android.useAndroidX=true
+          android.enableJetifier=true
+          org.gradle.jvmargs=-Xmx2048m -Dfile.encoding=UTF-8
+          EOF
+
+          # 2. settings.gradle.kts
           cat << 'EOF' > settings.gradle.kts
           pluginManagement {
               repositories {
@@ -52,7 +59,7 @@ jobs:
           include(":app")
           EOF
 
-          # 2. build.gradle.kts (Root)
+          # 3. build.gradle.kts (Root)
           cat << 'EOF' > build.gradle.kts
           plugins {
               id("com.android.application") version "8.2.2" apply false
@@ -60,7 +67,7 @@ jobs:
           }
           EOF
 
-          # 3. app/build.gradle.kts
+          # 4. app/build.gradle.kts
           cat << 'EOF' > app/build.gradle.kts
           plugins {
               id("com.android.application")
@@ -101,7 +108,7 @@ jobs:
           }
           EOF
 
-          # 4. AndroidManifest.xml
+          # 5. AndroidManifest.xml
           cat << 'EOF' > app/src/main/AndroidManifest.xml
           <?xml version="1.0" encoding="utf-8"?>
           <manifest xmlns:android="http://schemas.android.com/apk/res/android">
@@ -126,7 +133,7 @@ jobs:
           </manifest>
           EOF
 
-          # 5. res/xml/method.xml
+          # 6. res/xml/method.xml
           cat << 'EOF' > app/src/main/res/xml/method.xml
           <?xml version="1.0" encoding="utf-8"?>
           <input-method xmlns:android="http://schemas.android.com/apk/res/android">
@@ -137,7 +144,7 @@ jobs:
           </input-method>
           EOF
 
-          # 6. res/values files
+          # 7. res/values files
           cat << 'EOF' > app/src/main/res/values/strings.xml
           <resources>
               <string name="app_name">MI Keyboard</string>
@@ -168,7 +175,7 @@ jobs:
           </resources>
           EOF
 
-          # 7. Drawables
+          # 8. Drawables
           cat << 'EOF' > app/src/main/res/drawable/key_bg.xml
           <?xml version="1.0" encoding="utf-8"?>
           <ripple xmlns:android="http://schemas.android.com/apk/res/android" android:color="#44FFFFFF">
@@ -193,7 +200,7 @@ jobs:
           </ripple>
           EOF
 
-          # 8. Layout
+          # 9. Layout
           cat << 'EOF' > app/src/main/res/layout/keyboard_layout.xml
           <?xml version="1.0" encoding="utf-8"?>
           <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
@@ -203,7 +210,6 @@ jobs:
               android:orientation="vertical"
               android:padding="3dp">
 
-              <!-- HD Toolbar: All, Cut, Copy, 50K Paste, Nav Arrows -->
               <HorizontalScrollView
                   android:layout_width="match_parent"
                   android:layout_height="44dp"
@@ -299,7 +305,7 @@ jobs:
           </LinearLayout>
           EOF
 
-          # 9. TextEngine.kt (Chunk-streaming 50,000 lines bypass)
+          # 10. TextEngine.kt
           cat << 'EOF' > app/src/main/java/com/mi/keyboard/TextEngine.kt
           package com.mi.keyboard
 
@@ -342,7 +348,7 @@ jobs:
           }
           EOF
 
-          # 10. MIKeyboardService.kt (Service & Logic)
+          # 11. MIKeyboardService.kt
           cat << 'EOF' > app/src/main/java/com/mi/keyboard/MIKeyboardService.kt
           package com.mi.keyboard
 
