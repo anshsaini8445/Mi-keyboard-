@@ -1,0 +1,572 @@
+name: Build MI Keyboard APK
+
+on:
+  push:
+    branches: [ "main", "master" ]
+  workflow_dispatch:
+
+jobs:
+  build-apk:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repo
+        uses: actions/checkout@v4
+
+      - name: Setup Java 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v3
+        with:
+          gradle-version: '8.2'
+
+      - name: Generate Full MI-Keyboard Project Source
+        run: |
+          mkdir -p app/src/main/java/com/mi/keyboard
+          mkdir -p app/src/main/res/layout
+          mkdir -p app/src/main/res/values
+          mkdir -p app/src/main/res/xml
+          mkdir -p app/src/main/res/drawable
+
+          # 1. settings.gradle.kts
+          cat << 'EOF' > settings.gradle.kts
+          pluginManagement {
+              repositories {
+                  google()
+                  mavenCentral()
+                  gradlePluginPortal()
+              }
+          }
+          dependencyResolutionManagement {
+              repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
+              repositories {
+                  google()
+                  mavenCentral()
+              }
+          }
+          rootProject.name = "MI-Keyboard"
+          include(":app")
+          EOF
+
+          # 2. build.gradle.kts (Root)
+          cat << 'EOF' > build.gradle.kts
+          plugins {
+              id("com.android.application") version "8.2.2" apply false
+              id("org.jetbrains.kotlin.android") version "1.9.22" apply false
+          }
+          EOF
+
+          # 3. app/build.gradle.kts
+          cat << 'EOF' > app/build.gradle.kts
+          plugins {
+              id("com.android.application")
+              id("org.jetbrains.kotlin.android")
+          }
+
+          android {
+              namespace = "com.mi.keyboard"
+              compileSdk = 34
+
+              defaultConfig {
+                  applicationId = "com.mi.keyboard"
+                  minSdk = 26
+                  targetSdk = 34
+                  versionCode = 1
+                  versionName = "1.0-PRO"
+              }
+
+              buildTypes {
+                  release {
+                      isMinifyEnabled = false
+                  }
+              }
+              compileOptions {
+                  sourceCompatibility = JavaVersion.VERSION_17
+                  targetCompatibility = JavaVersion.VERSION_17
+              }
+              kotlinOptions {
+                  jvmTarget = "17"
+              }
+          }
+
+          dependencies {
+              implementation("androidx.core:core-ktx:1.12.0")
+              implementation("androidx.appcompat:appcompat:1.6.1")
+              implementation("com.google.android.material:material:1.11.0")
+              implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3")
+          }
+          EOF
+
+          # 4. AndroidManifest.xml
+          cat << 'EOF' > app/src/main/AndroidManifest.xml
+          <?xml version="1.0" encoding="utf-8"?>
+          <manifest xmlns:android="http://schemas.android.com/apk/res/android">
+              <application
+                  android:allowBackup="true"
+                  android:label="MI Keyboard"
+                  android:supportsRtl="true"
+                  android:theme="@style/Theme.MIKeyboard">
+                  <service
+                      android:name=".MIKeyboardService"
+                      android:label="MI Keyboard"
+                      android:permission="android.permission.BIND_INPUT_METHOD"
+                      android:exported="true">
+                      <intent-filter>
+                          <action android:name="android.view.InputMethod" />
+                      </intent-filter>
+                      <meta-data
+                          android:name="android.view.im"
+                          android:resource="@xml/method" />
+                  </service>
+              </application>
+          </manifest>
+          EOF
+
+          # 5. res/xml/method.xml
+          cat << 'EOF' > app/src/main/res/xml/method.xml
+          <?xml version="1.0" encoding="utf-8"?>
+          <input-method xmlns:android="http://schemas.android.com/apk/res/android">
+              <subtype
+                  android:label="English (US)"
+                  android:imeSubtypeLocale="en_US"
+                  android:imeSubtypeMode="keyboard" />
+          </input-method>
+          EOF
+
+          # 6. res/values files
+          cat << 'EOF' > app/src/main/res/values/strings.xml
+          <resources>
+              <string name="app_name">MI Keyboard</string>
+          </resources>
+          EOF
+
+          cat << 'EOF' > app/src/main/res/values/colors.xml
+          <?xml version="1.0" encoding="utf-8"?>
+          <resources>
+              <color name="kb_bg">#121212</color>
+              <color name="kb_toolbar_bg">#1A1A1A</color>
+              <color name="kb_key_normal">#2A2A2C</color>
+              <color name="kb_key_special">#38383A</color>
+              <color name="kb_accent_cyan">#00E5FF</color>
+              <color name="kb_accent_red">#FF5252</color>
+              <color name="kb_accent_green">#69F0AE</color>
+              <color name="kb_accent_gold">#FFD700</color>
+              <color name="kb_white">#FFFFFF</color>
+          </resources>
+          EOF
+
+          cat << 'EOF' > app/src/main/res/values/themes.xml
+          <?xml version="1.0" encoding="utf-8"?>
+          <resources>
+              <style name="Theme.MIKeyboard" parent="Theme.MaterialComponents.DayNight.NoActionBar">
+                  <item name="android:windowBackground">@color/kb_bg</item>
+              </style>
+          </resources>
+          EOF
+
+          # 7. Drawables
+          cat << 'EOF' > app/src/main/res/drawable/key_bg.xml
+          <?xml version="1.0" encoding="utf-8"?>
+          <ripple xmlns:android="http://schemas.android.com/apk/res/android" android:color="#44FFFFFF">
+              <item>
+                  <shape android:shape="rectangle">
+                      <solid android:color="#2A2A2C" />
+                      <corners android:radius="8dp" />
+                  </shape>
+              </item>
+          </ripple>
+          EOF
+
+          cat << 'EOF' > app/src/main/res/drawable/key_special_bg.xml
+          <?xml version="1.0" encoding="utf-8"?>
+          <ripple xmlns:android="http://schemas.android.com/apk/res/android" android:color="#44FFFFFF">
+              <item>
+                  <shape android:shape="rectangle">
+                      <solid android:color="#38383A" />
+                      <corners android:radius="8dp" />
+                  </shape>
+              </item>
+          </ripple>
+          EOF
+
+          # 8. Layout
+          cat << 'EOF' > app/src/main/res/layout/keyboard_layout.xml
+          <?xml version="1.0" encoding="utf-8"?>
+          <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              android:layout_width="match_parent"
+              android:layout_height="wrap_content"
+              android:background="@color/kb_bg"
+              android:orientation="vertical"
+              android:padding="3dp">
+
+              <!-- HD Toolbar: All, Cut, Copy, 50K Paste, Nav Arrows -->
+              <HorizontalScrollView
+                  android:layout_width="match_parent"
+                  android:layout_height="44dp"
+                  android:background="@color/kb_toolbar_bg"
+                  android:scrollbars="none">
+
+                  <LinearLayout
+                      android:layout_width="wrap_content"
+                      android:layout_height="match_parent"
+                      android:gravity="center_vertical"
+                      android:orientation="horizontal"
+                      android:paddingHorizontal="4dp">
+
+                      <Button
+                          android:id="@+id/btn_all"
+                          android:layout_width="wrap_content"
+                          android:layout_height="36dp"
+                          android:background="?attr/selectableItemBackground"
+                          android:text="ALL"
+                          android:textColor="@color/kb_accent_cyan"
+                          android:textStyle="bold" />
+
+                      <Button
+                          android:id="@+id/btn_cut"
+                          android:layout_width="wrap_content"
+                          android:layout_height="36dp"
+                          android:background="?attr/selectableItemBackground"
+                          android:text="CUT"
+                          android:textColor="@color/kb_accent_red"
+                          android:textStyle="bold" />
+
+                      <Button
+                          android:id="@+id/btn_copy"
+                          android:layout_width="wrap_content"
+                          android:layout_height="36dp"
+                          android:background="?attr/selectableItemBackground"
+                          android:text="COPY"
+                          android:textColor="@color/kb_accent_green"
+                          android:textStyle="bold" />
+
+                      <Button
+                          android:id="@+id/btn_ultra_paste"
+                          android:layout_width="wrap_content"
+                          android:layout_height="36dp"
+                          android:background="?attr/selectableItemBackground"
+                          android:text="⚡ 50K TURBO PASTE"
+                          android:textColor="@color/kb_accent_gold"
+                          android:textStyle="bold" />
+
+                      <Button
+                          android:id="@+id/btn_left"
+                          android:layout_width="44dp"
+                          android:layout_height="36dp"
+                          android:background="?attr/selectableItemBackground"
+                          android:text="◀"
+                          android:textColor="@color/kb_white" />
+
+                      <Button
+                          android:id="@+id/btn_right"
+                          android:layout_width="44dp"
+                          android:layout_height="36dp"
+                          android:background="?attr/selectableItemBackground"
+                          android:text="▶"
+                          android:textColor="@color/kb_white" />
+                  </LinearLayout>
+              </HorizontalScrollView>
+
+              <FrameLayout
+                  android:layout_width="match_parent"
+                  android:layout_height="wrap_content"
+                  android:layout_marginTop="2dp">
+
+                  <LinearLayout
+                      android:id="@+id/keyboard_keys"
+                      android:layout_width="match_parent"
+                      android:layout_height="wrap_content"
+                      android:orientation="vertical" />
+
+                  <ScrollView
+                      android:id="@+id/emoji_panel"
+                      android:layout_width="match_parent"
+                      android:layout_height="240dp"
+                      android:visibility="gone">
+
+                      <GridLayout
+                          android:id="@+id/emoji_grid"
+                          android:layout_width="match_parent"
+                          android:layout_height="wrap_content"
+                          android:columnCount="7"
+                          android:padding="6dp" />
+                  </ScrollView>
+              </FrameLayout>
+          </LinearLayout>
+          EOF
+
+          # 9. TextEngine.kt (Chunk-streaming 50,000 lines bypass)
+          cat << 'EOF' > app/src/main/java/com/mi/keyboard/TextEngine.kt
+          package com.mi.keyboard
+
+          import android.view.inputmethod.InputConnection
+          import kotlinx.coroutines.CoroutineScope
+          import kotlinx.coroutines.Dispatchers
+          import kotlinx.coroutines.launch
+          import kotlinx.coroutines.withContext
+
+          class TextEngine(private val scope: CoroutineScope) {
+              private val CHUNK_SIZE = 4096
+
+              fun streamLargeText(ic: InputConnection?, text: CharSequence, onDone: () -> Unit = {}) {
+                  if (ic == null || text.isEmpty()) return
+
+                  scope.launch(Dispatchers.Default) {
+                      val len = text.length
+                      var idx = 0
+
+                      withContext(Dispatchers.Main) {
+                          ic.beginBatchEdit()
+                      }
+
+                      while (idx < len) {
+                          val end = (idx + CHUNK_SIZE).coerceAtMost(len)
+                          val chunk = text.subSequence(idx, end).toString()
+
+                          withContext(Dispatchers.Main) {
+                              ic.commitText(chunk, 1)
+                          }
+                          idx = end
+                      }
+
+                      withContext(Dispatchers.Main) {
+                          ic.endBatchEdit()
+                          onDone()
+                      }
+                  }
+              }
+          }
+          EOF
+
+          # 10. MIKeyboardService.kt (Service & Logic)
+          cat << 'EOF' > app/src/main/java/com/mi/keyboard/MIKeyboardService.kt
+          package com.mi.keyboard
+
+          import android.content.ClipData
+          import android.content.ClipboardManager
+          import android.content.Context
+          import android.inputmethodservice.InputMethodService
+          import android.view.KeyEvent
+          import android.view.View
+          import android.widget.Button
+          import android.widget.GridLayout
+          import android.widget.LinearLayout
+          import android.widget.ScrollView
+          import androidx.core.content.ContextCompat
+          import kotlinx.coroutines.CoroutineScope
+          import kotlinx.coroutines.Dispatchers
+          import kotlinx.coroutines.SupervisorJob
+          import kotlinx.coroutines.cancel
+
+          class MIKeyboardService : InputMethodService() {
+
+              private val job = SupervisorJob()
+              private val serviceScope = CoroutineScope(Dispatchers.Main + job)
+              private lateinit var textEngine: TextEngine
+              private lateinit var clipManager: ClipboardManager
+
+              private var isCaps = false
+              private var isSymbols = false
+              private var isEmojiOpen = false
+
+              private lateinit var keysLayout: LinearLayout
+              private lateinit var emojiPanel: ScrollView
+              private lateinit var emojiGrid: GridLayout
+
+              private val emojis = listOf(
+                  "😀","😃","😄","😁","😆","😅","😂","🤣","🥲","🥹","😊","😇","🙂","🙃","😉",
+                  "😌","😍","🥰","😘","😗","😙","😚","😋","😛","😝","😜","🤪","🤨","🧐","🤓",
+                  "😎","🥸","🤩","🥳","😏","😒","😞","😔","😟","😕","🙁","☹️","😣","😖","😫",
+                  "😩","🥺","😢","😭","😮‍💨","😤","😠","😡","🤬","🤯","😳","🥵","🥶","😱","😨",
+                  "👍","👎","👌","✌️","🤞","🫰","🤟","🤘","🤙","👈","👉","👆","🖕","👇","☝️",
+                  "🫵","👋","🤚","🖐️","✋","🖖","👏","🙌","🫶","👐","🤲","🤝","🙏","✍️","💅",
+                  "❤️","🧡","💛","💚","💙","💜","🖤","🤍","🤎","💔","❤️‍🔥","❤️‍🩹","❣️","💕","💞",
+                  "💓","💗","💖","💘","💝","🔥","💯","✨","🎉","🚀","⚡","⭐","🌟","💡","💻"
+              )
+
+              override fun onCreate() {
+                  super.onCreate()
+                  textEngine = TextEngine(serviceScope)
+                  clipManager = getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+              }
+
+              override fun onCreateInputView(): View {
+                  val root = layoutInflater.inflate(R.layout.keyboard_layout, null)
+                  keysLayout = root.findViewById(R.id.keyboard_keys)
+                  emojiPanel = root.findViewById(R.id.emoji_panel)
+                  emojiGrid = root.findViewById(R.id.emoji_grid)
+
+                  setupToolbarActions(root)
+                  setupEmojiGrid()
+                  refreshKeys()
+
+                  return root
+              }
+
+              private fun setupToolbarActions(root: View) {
+                  root.findViewById<Button>(R.id.btn_all).setOnClickListener {
+                      currentInputConnection?.performContextMenuAction(android.R.id.selectAll)
+                  }
+                  root.findViewById<Button>(R.id.btn_cut).setOnClickListener {
+                      currentInputConnection?.performContextMenuAction(android.R.id.cut)
+                  }
+                  root.findViewById<Button>(R.id.btn_copy).setOnClickListener {
+                      currentInputConnection?.performContextMenuAction(android.R.id.copy)
+                  }
+                  root.findViewById<Button>(R.id.btn_ultra_paste).setOnClickListener {
+                      val clip: ClipData? = clipManager.primaryClip
+                      if (clip != null && clip.itemCount > 0) {
+                          val text = clip.getItemAt(0).coerceToText(this)
+                          if (!text.isNullOrEmpty()) {
+                              textEngine.streamLargeText(currentInputConnection, text)
+                          }
+                      }
+                  }
+                  root.findViewById<Button>(R.id.btn_left).setOnClickListener {
+                      currentInputConnection?.sendKeyEvent(KeyEvent(KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_DPAD_LEFT))
+                      currentInputConnection?.sendKeyEvent(KeyEvent(KeyEvent.ACTION_UP, KeyEvent.KEYCODE_DPAD_LEFT))
+                  }
+                  root.findViewById<Button>(R.id.btn_right).setOnClickListener {
+                      currentInputConnection?.sendKeyEvent(KeyEvent(KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_DPAD_RIGHT))
+                      currentInputConnection?.sendKeyEvent(KeyEvent(KeyEvent.ACTION_UP, KeyEvent.KEYCODE_DPAD_RIGHT))
+                  }
+              }
+
+              private fun setupEmojiGrid() {
+                  emojiGrid.removeAllViews()
+                  for (emo in emojis) {
+                      val btn = Button(this).apply {
+                          text = emo
+                          textSize = 20f
+                          setBackgroundColor(0x00000000)
+                          setOnClickListener {
+                              currentInputConnection?.commitText(emo, 1)
+                          }
+                      }
+                      emojiGrid.addView(btn)
+                  }
+              }
+
+              private fun refreshKeys() {
+                  if (isEmojiOpen) {
+                      keysLayout.visibility = View.GONE
+                      emojiPanel.visibility = View.VISIBLE
+                      return
+                  }
+
+                  keysLayout.visibility = View.VISIBLE
+                  emojiPanel.visibility = View.GONE
+                  keysLayout.removeAllViews()
+
+                  val rows = if (!isSymbols) {
+                      listOf(
+                          listOf("q","w","e","r","t","y","u","i","o","p"),
+                          listOf("a","s","d","f","g","h","j","k","l"),
+                          listOf("CAPS","z","x","c","v","b","n","m","DEL"),
+                          listOf("?123","😀","SPACE","ENTER")
+                      )
+                  } else {
+                      listOf(
+                          listOf("1","2","3","4","5","6","7","8","9","0"),
+                          listOf("@","#","$","%","&","*","-","+","="),
+                          listOf("(","/",":",";","!","?","\"",")","DEL"),
+                          listOf("ABC","😀","SPACE","ENTER")
+                      )
+                  }
+
+                  for (row in rows) {
+                      val rowView = LinearLayout(this).apply {
+                          layoutParams = LinearLayout.LayoutParams(
+                              LinearLayout.LayoutParams.MATCH_PARENT,
+                              LinearLayout.LayoutParams.WRAP_CONTENT
+                          )
+                          orientation = LinearLayout.HORIZONTAL
+                      }
+
+                      for (k in row) {
+                          val btn = Button(this).apply {
+                              var label = k
+                              if (!isSymbols && isCaps && k.length == 1) {
+                                  label = k.uppercase()
+                              }
+                              text = label
+                              setTextColor(0xFFFFFFFF.toInt())
+                              textSize = if (k.length > 2) 12f else 15f
+
+                              val isSpecial = k in listOf("DEL", "CAPS", "ENTER", "?123", "ABC", "😀")
+                              background = ContextCompat.getDrawable(
+                                  this@MIKeyboardService,
+                                  if (isSpecial) R.drawable.key_special_bg else R.drawable.key_bg
+                              )
+
+                              val weight = when (k) {
+                                  "SPACE" -> 4.0f
+                                  "ENTER", "?123", "ABC" -> 1.8f
+                                  "CAPS", "DEL" -> 1.5f
+                                  "😀" -> 1.2f
+                                  else -> 1.0f
+                              }
+
+                              layoutParams = LinearLayout.LayoutParams(0, 135, weight).apply {
+                                  setMargins(2, 3, 2, 3)
+                              }
+
+                              setOnClickListener { handleKeyClick(k) }
+                          }
+                          rowView.addView(btn)
+                      }
+                      keysLayout.addView(rowView)
+                  }
+              }
+
+              private fun handleKeyClick(key: String) {
+                  val ic = currentInputConnection ?: return
+                  when (key) {
+                      "DEL" -> ic.deleteSurroundingText(1, 0)
+                      "CAPS" -> {
+                          isCaps = !isCaps
+                          refreshKeys()
+                      }
+                      "SPACE" -> ic.commitText(" ", 1)
+                      "ENTER" -> {
+                          ic.sendKeyEvent(KeyEvent(KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_ENTER))
+                          ic.sendKeyEvent(KeyEvent(KeyEvent.ACTION_UP, KeyEvent.KEYCODE_ENTER))
+                      }
+                      "?123" -> {
+                          isSymbols = true
+                          refreshKeys()
+                      }
+                      "ABC" -> {
+                          isSymbols = false
+                          refreshKeys()
+                      }
+                      "😀" -> {
+                          isEmojiOpen = !isEmojiOpen
+                          refreshKeys()
+                      }
+                      else -> {
+                          val charToCommit = if (isCaps && !isSymbols) key.uppercase() else key
+                          ic.commitText(charToCommit, 1)
+                      }
+                  }
+              }
+
+              override fun onDestroy() {
+                  super.onDestroy()
+                  serviceScope.cancel()
+              }
+          }
+          EOF
+
+      - name: Compile Debug APK
+        run: gradle assembleDebug
+
+      - name: Upload Finished APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: MI-Keyboard-App
+          path: app/build/outputs/apk/debug/app-debug.apk
