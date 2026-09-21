@@ -32,7 +32,7 @@ jobs:
           mkdir -p app/src/main/res/xml
           mkdir -p app/src/main/res/drawable
 
-          # 1. gradle.properties (Fixes AndroidX Error)
+          # 1. gradle.properties
           cat << 'EOF' > gradle.properties
           android.useAndroidX=true
           android.enableJetifier=true
@@ -82,8 +82,8 @@ jobs:
                   applicationId = "com.mi.keyboard"
                   minSdk = 26
                   targetSdk = 34
-                  versionCode = 1
-                  versionName = "1.0-PRO"
+                  versionCode = 2
+                  versionName = "1.0.1-STABLE"
               }
 
               buildTypes {
@@ -102,8 +102,6 @@ jobs:
 
           dependencies {
               implementation("androidx.core:core-ktx:1.12.0")
-              implementation("androidx.appcompat:appcompat:1.6.1")
-              implementation("com.google.android.material:material:1.11.0")
               implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3")
           }
           EOF
@@ -116,11 +114,12 @@ jobs:
                   android:allowBackup="true"
                   android:label="MI Keyboard"
                   android:supportsRtl="true"
-                  android:theme="@style/Theme.MIKeyboard">
+                  android:theme="@android:style/Theme.DeviceDefault.InputMethod">
                   <service
                       android:name=".MIKeyboardService"
                       android:label="MI Keyboard"
                       android:permission="android.permission.BIND_INPUT_METHOD"
+                      android:theme="@android:style/Theme.DeviceDefault.InputMethod"
                       android:exported="true">
                       <intent-filter>
                           <action android:name="android.view.InputMethod" />
@@ -155,9 +154,9 @@ jobs:
           <?xml version="1.0" encoding="utf-8"?>
           <resources>
               <color name="kb_bg">#121212</color>
-              <color name="kb_toolbar_bg">#1A1A1A</color>
+              <color name="kb_toolbar_bg">#1E1E1E</color>
               <color name="kb_key_normal">#2A2A2C</color>
-              <color name="kb_key_special">#38383A</color>
+              <color name="kb_key_special">#3A3A3C</color>
               <color name="kb_accent_cyan">#00E5FF</color>
               <color name="kb_accent_red">#FF5252</color>
               <color name="kb_accent_green">#69F0AE</color>
@@ -166,41 +165,35 @@ jobs:
           </resources>
           EOF
 
-          cat << 'EOF' > app/src/main/res/values/themes.xml
-          <?xml version="1.0" encoding="utf-8"?>
-          <resources>
-              <style name="Theme.MIKeyboard" parent="Theme.MaterialComponents.DayNight.NoActionBar">
-                  <item name="android:windowBackground">@color/kb_bg</item>
-              </style>
-          </resources>
-          EOF
-
           # 8. Drawables
           cat << 'EOF' > app/src/main/res/drawable/key_bg.xml
           <?xml version="1.0" encoding="utf-8"?>
-          <ripple xmlns:android="http://schemas.android.com/apk/res/android" android:color="#44FFFFFF">
-              <item>
-                  <shape android:shape="rectangle">
-                      <solid android:color="#2A2A2C" />
-                      <corners android:radius="8dp" />
-                  </shape>
-              </item>
-          </ripple>
+          <shape xmlns:android="http://schemas.android.com/apk/res/android"
+              android:shape="rectangle">
+              <solid android:color="#2A2A2C" />
+              <corners android:radius="8dp" />
+          </shape>
           EOF
 
           cat << 'EOF' > app/src/main/res/drawable/key_special_bg.xml
           <?xml version="1.0" encoding="utf-8"?>
-          <ripple xmlns:android="http://schemas.android.com/apk/res/android" android:color="#44FFFFFF">
-              <item>
-                  <shape android:shape="rectangle">
-                      <solid android:color="#38383A" />
-                      <corners android:radius="8dp" />
-                  </shape>
-              </item>
-          </ripple>
+          <shape xmlns:android="http://schemas.android.com/apk/res/android"
+              android:shape="rectangle">
+              <solid android:color="#3A3A3C" />
+              <corners android:radius="8dp" />
+          </shape>
           EOF
 
-          # 9. Layout
+          cat << 'EOF' > app/src/main/res/drawable/toolbar_btn_bg.xml
+          <?xml version="1.0" encoding="utf-8"?>
+          <shape xmlns:android="http://schemas.android.com/apk/res/android"
+              android:shape="rectangle">
+              <solid android:color="#262626" />
+              <corners android:radius="6dp" />
+          </shape>
+          EOF
+
+          # 9. Layout (Using native attributes only)
           cat << 'EOF' > app/src/main/res/layout/keyboard_layout.xml
           <?xml version="1.0" encoding="utf-8"?>
           <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
@@ -210,6 +203,7 @@ jobs:
               android:orientation="vertical"
               android:padding="3dp">
 
+              <!-- HD Toolbar -->
               <HorizontalScrollView
                   android:layout_width="match_parent"
                   android:layout_height="44dp"
@@ -227,7 +221,8 @@ jobs:
                           android:id="@+id/btn_all"
                           android:layout_width="wrap_content"
                           android:layout_height="36dp"
-                          android:background="?attr/selectableItemBackground"
+                          android:layout_marginEnd="4dp"
+                          android:background="@drawable/toolbar_btn_bg"
                           android:text="ALL"
                           android:textColor="@color/kb_accent_cyan"
                           android:textStyle="bold" />
@@ -236,7 +231,8 @@ jobs:
                           android:id="@+id/btn_cut"
                           android:layout_width="wrap_content"
                           android:layout_height="36dp"
-                          android:background="?attr/selectableItemBackground"
+                          android:layout_marginEnd="4dp"
+                          android:background="@drawable/toolbar_btn_bg"
                           android:text="CUT"
                           android:textColor="@color/kb_accent_red"
                           android:textStyle="bold" />
@@ -245,7 +241,8 @@ jobs:
                           android:id="@+id/btn_copy"
                           android:layout_width="wrap_content"
                           android:layout_height="36dp"
-                          android:background="?attr/selectableItemBackground"
+                          android:layout_marginEnd="4dp"
+                          android:background="@drawable/toolbar_btn_bg"
                           android:text="COPY"
                           android:textColor="@color/kb_accent_green"
                           android:textStyle="bold" />
@@ -254,7 +251,8 @@ jobs:
                           android:id="@+id/btn_ultra_paste"
                           android:layout_width="wrap_content"
                           android:layout_height="36dp"
-                          android:background="?attr/selectableItemBackground"
+                          android:layout_marginEnd="4dp"
+                          android:background="@drawable/toolbar_btn_bg"
                           android:text="⚡ 50K TURBO PASTE"
                           android:textColor="@color/kb_accent_gold"
                           android:textStyle="bold" />
@@ -263,7 +261,8 @@ jobs:
                           android:id="@+id/btn_left"
                           android:layout_width="44dp"
                           android:layout_height="36dp"
-                          android:background="?attr/selectableItemBackground"
+                          android:layout_marginEnd="4dp"
+                          android:background="@drawable/toolbar_btn_bg"
                           android:text="◀"
                           android:textColor="@color/kb_white" />
 
@@ -271,7 +270,7 @@ jobs:
                           android:id="@+id/btn_right"
                           android:layout_width="44dp"
                           android:layout_height="36dp"
-                          android:background="?attr/selectableItemBackground"
+                          android:background="@drawable/toolbar_btn_bg"
                           android:text="▶"
                           android:textColor="@color/kb_white" />
                   </LinearLayout>
@@ -291,7 +290,7 @@ jobs:
                   <ScrollView
                       android:id="@+id/emoji_panel"
                       android:layout_width="match_parent"
-                      android:layout_height="240dp"
+                      android:layout_height="230dp"
                       android:visibility="gone">
 
                       <GridLayout
@@ -318,7 +317,7 @@ jobs:
           class TextEngine(private val scope: CoroutineScope) {
               private val CHUNK_SIZE = 4096
 
-              fun streamLargeText(ic: InputConnection?, text: CharSequence, onDone: () -> Unit = {}) {
+              fun streamLargeText(ic: InputConnection?, text: CharSequence) {
                   if (ic == null || text.isEmpty()) return
 
                   scope.launch(Dispatchers.Default) {
@@ -341,7 +340,6 @@ jobs:
 
                       withContext(Dispatchers.Main) {
                           ic.endBatchEdit()
-                          onDone()
                       }
                   }
               }
@@ -362,6 +360,7 @@ jobs:
           import android.widget.GridLayout
           import android.widget.LinearLayout
           import android.widget.ScrollView
+          import android.widget.TextView
           import androidx.core.content.ContextCompat
           import kotlinx.coroutines.CoroutineScope
           import kotlinx.coroutines.Dispatchers
@@ -379,19 +378,17 @@ jobs:
               private var isSymbols = false
               private var isEmojiOpen = false
 
-              private lateinit var keysLayout: LinearLayout
-              private lateinit var emojiPanel: ScrollView
-              private lateinit var emojiGrid: GridLayout
+              private var keysLayout: LinearLayout? = null
+              private var emojiPanel: ScrollView? = null
+              private var emojiGrid: GridLayout? = null
 
               private val emojis = listOf(
-                  "😀","😃","😄","😁","😆","😅","😂","🤣","🥲","🥹","😊","😇","🙂","🙃","😉",
-                  "😌","😍","🥰","😘","😗","😙","😚","😋","😛","😝","😜","🤪","🤨","🧐","🤓",
-                  "😎","🥸","🤩","🥳","😏","😒","😞","😔","😟","😕","🙁","☹️","😣","😖","😫",
-                  "😩","🥺","😢","😭","😮‍💨","😤","😠","😡","🤬","🤯","😳","🥵","🥶","😱","😨",
-                  "👍","👎","👌","✌️","🤞","🫰","🤟","🤘","🤙","👈","👉","👆","🖕","👇","☝️",
-                  "🫵","👋","🤚","🖐️","✋","🖖","👏","🙌","🫶","👐","🤲","🤝","🙏","✍️","💅",
-                  "❤️","🧡","💛","💚","💙","💜","🖤","🤍","🤎","💔","❤️‍🔥","❤️‍🩹","❣️","💕","💞",
-                  "💓","💗","💖","💘","💝","🔥","💯","✨","🎉","🚀","⚡","⭐","🌟","💡","💻"
+                  "😀","😃","😄","😁","😆","😅","😂","🤣","😊","😇","🙂","🙃","😉","😌","😍",
+                  "🥰","😘","😗","😙","😚","😋","😛","😝","😜","🤪","🤨","🧐","🤓","😎","🥳",
+                  "😏","😒","😞","😔","😟","😕","🙁","☹️","😣","😖","😫","😩","🥺","😢","😭",
+                  "😤","😠","😡","🤬","🤯","😳","🥵","🥶","😱","😨","👍","👎","👌","✌️","🤞",
+                  "🤟","🤘","🤙","👈","👉","👆","🖕","👇","☝️","👋","✋","👏","🙌","🫶","🤝",
+                  "🙏","❤️","🧡","💛","💚","💙","💜","🖤","🤍","🤎","💔","🔥","💯","✨","🎉"
               )
 
               override fun onCreate() {
@@ -414,16 +411,16 @@ jobs:
               }
 
               private fun setupToolbarActions(root: View) {
-                  root.findViewById<Button>(R.id.btn_all).setOnClickListener {
+                  root.findViewById<Button>(R.id.btn_all)?.setOnClickListener {
                       currentInputConnection?.performContextMenuAction(android.R.id.selectAll)
                   }
-                  root.findViewById<Button>(R.id.btn_cut).setOnClickListener {
+                  root.findViewById<Button>(R.id.btn_cut)?.setOnClickListener {
                       currentInputConnection?.performContextMenuAction(android.R.id.cut)
                   }
-                  root.findViewById<Button>(R.id.btn_copy).setOnClickListener {
+                  root.findViewById<Button>(R.id.btn_copy)?.setOnClickListener {
                       currentInputConnection?.performContextMenuAction(android.R.id.copy)
                   }
-                  root.findViewById<Button>(R.id.btn_ultra_paste).setOnClickListener {
+                  root.findViewById<Button>(R.id.btn_ultra_paste)?.setOnClickListener {
                       val clip: ClipData? = clipManager.primaryClip
                       if (clip != null && clip.itemCount > 0) {
                           val text = clip.getItemAt(0).coerceToText(this)
@@ -432,41 +429,46 @@ jobs:
                           }
                       }
                   }
-                  root.findViewById<Button>(R.id.btn_left).setOnClickListener {
+                  root.findViewById<Button>(R.id.btn_left)?.setOnClickListener {
                       currentInputConnection?.sendKeyEvent(KeyEvent(KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_DPAD_LEFT))
                       currentInputConnection?.sendKeyEvent(KeyEvent(KeyEvent.ACTION_UP, KeyEvent.KEYCODE_DPAD_LEFT))
                   }
-                  root.findViewById<Button>(R.id.btn_right).setOnClickListener {
+                  root.findViewById<Button>(R.id.btn_right)?.setOnClickListener {
                       currentInputConnection?.sendKeyEvent(KeyEvent(KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_DPAD_RIGHT))
                       currentInputConnection?.sendKeyEvent(KeyEvent(KeyEvent.ACTION_UP, KeyEvent.KEYCODE_DPAD_RIGHT))
                   }
               }
 
               private fun setupEmojiGrid() {
-                  emojiGrid.removeAllViews()
+                  val grid = emojiGrid ?: return
+                  grid.removeAllViews()
                   for (emo in emojis) {
-                      val btn = Button(this).apply {
+                      val tv = TextView(this).apply {
                           text = emo
-                          textSize = 20f
-                          setBackgroundColor(0x00000000)
+                          textSize = 24f
+                          gravity = android.view.Gravity.CENTER
+                          setPadding(12, 12, 12, 12)
                           setOnClickListener {
                               currentInputConnection?.commitText(emo, 1)
                           }
                       }
-                      emojiGrid.addView(btn)
+                      grid.addView(tv)
                   }
               }
 
               private fun refreshKeys() {
+                  val layout = keysLayout ?: return
+                  val panel = emojiPanel ?: return
+
                   if (isEmojiOpen) {
-                      keysLayout.visibility = View.GONE
-                      emojiPanel.visibility = View.VISIBLE
+                      layout.visibility = View.GONE
+                      panel.visibility = View.VISIBLE
                       return
                   }
 
-                  keysLayout.visibility = View.VISIBLE
-                  emojiPanel.visibility = View.GONE
-                  keysLayout.removeAllViews()
+                  layout.visibility = View.VISIBLE
+                  panel.visibility = View.GONE
+                  layout.removeAllViews()
 
                   val rows = if (!isSymbols) {
                       listOf(
@@ -517,7 +519,7 @@ jobs:
                                   else -> 1.0f
                               }
 
-                              layoutParams = LinearLayout.LayoutParams(0, 135, weight).apply {
+                              layoutParams = LinearLayout.LayoutParams(0, 130, weight).apply {
                                   setMargins(2, 3, 2, 3)
                               }
 
@@ -525,7 +527,7 @@ jobs:
                           }
                           rowView.addView(btn)
                       }
-                      keysLayout.addView(rowView)
+                      layout.addView(rowView)
                   }
               }
 
