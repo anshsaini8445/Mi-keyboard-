@@ -82,8 +82,8 @@ jobs:
                   applicationId = "com.mi.keyboard"
                   minSdk = 26
                   targetSdk = 34
-                  versionCode = 2
-                  versionName = "1.0.1-STABLE"
+                  versionCode = 3
+                  versionName = "1.0.2-HD"
               }
 
               buildTypes {
@@ -153,9 +153,9 @@ jobs:
           cat << 'EOF' > app/src/main/res/values/colors.xml
           <?xml version="1.0" encoding="utf-8"?>
           <resources>
-              <color name="kb_bg">#121212</color>
-              <color name="kb_toolbar_bg">#1E1E1E</color>
-              <color name="kb_key_normal">#2A2A2C</color>
+              <color name="kb_bg">#131315</color>
+              <color name="kb_toolbar_bg">#1C1C1E</color>
+              <color name="kb_key_normal">#2C2C2E</color>
               <color name="kb_key_special">#3A3A3C</color>
               <color name="kb_accent_cyan">#00E5FF</color>
               <color name="kb_accent_red">#FF5252</color>
@@ -170,8 +170,8 @@ jobs:
           <?xml version="1.0" encoding="utf-8"?>
           <shape xmlns:android="http://schemas.android.com/apk/res/android"
               android:shape="rectangle">
-              <solid android:color="#2A2A2C" />
-              <corners android:radius="8dp" />
+              <solid android:color="#2C2C2E" />
+              <corners android:radius="7dp" />
           </shape>
           EOF
 
@@ -180,7 +180,7 @@ jobs:
           <shape xmlns:android="http://schemas.android.com/apk/res/android"
               android:shape="rectangle">
               <solid android:color="#3A3A3C" />
-              <corners android:radius="8dp" />
+              <corners android:radius="7dp" />
           </shape>
           EOF
 
@@ -188,12 +188,12 @@ jobs:
           <?xml version="1.0" encoding="utf-8"?>
           <shape xmlns:android="http://schemas.android.com/apk/res/android"
               android:shape="rectangle">
-              <solid android:color="#262626" />
+              <solid android:color="#262629" />
               <corners android:radius="6dp" />
           </shape>
           EOF
 
-          # 9. Layout (Using native attributes only)
+          # 9. Layout (Samsung Style Toolbar + Separate Emoji View with Back Button)
           cat << 'EOF' > app/src/main/res/layout/keyboard_layout.xml
           <?xml version="1.0" encoding="utf-8"?>
           <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
@@ -201,12 +201,12 @@ jobs:
               android:layout_height="wrap_content"
               android:background="@color/kb_bg"
               android:orientation="vertical"
-              android:padding="3dp">
+              android:padding="2dp">
 
-              <!-- HD Toolbar -->
+              <!-- Top Fast-Edit Toolbar -->
               <HorizontalScrollView
                   android:layout_width="match_parent"
-                  android:layout_height="44dp"
+                  android:layout_height="42dp"
                   android:background="@color/kb_toolbar_bg"
                   android:scrollbars="none">
 
@@ -220,7 +220,7 @@ jobs:
                       <Button
                           android:id="@+id/btn_all"
                           android:layout_width="wrap_content"
-                          android:layout_height="36dp"
+                          android:layout_height="34dp"
                           android:layout_marginEnd="4dp"
                           android:background="@drawable/toolbar_btn_bg"
                           android:text="ALL"
@@ -230,7 +230,7 @@ jobs:
                       <Button
                           android:id="@+id/btn_cut"
                           android:layout_width="wrap_content"
-                          android:layout_height="36dp"
+                          android:layout_height="34dp"
                           android:layout_marginEnd="4dp"
                           android:background="@drawable/toolbar_btn_bg"
                           android:text="CUT"
@@ -240,7 +240,7 @@ jobs:
                       <Button
                           android:id="@+id/btn_copy"
                           android:layout_width="wrap_content"
-                          android:layout_height="36dp"
+                          android:layout_height="34dp"
                           android:layout_marginEnd="4dp"
                           android:background="@drawable/toolbar_btn_bg"
                           android:text="COPY"
@@ -250,7 +250,7 @@ jobs:
                       <Button
                           android:id="@+id/btn_ultra_paste"
                           android:layout_width="wrap_content"
-                          android:layout_height="36dp"
+                          android:layout_height="34dp"
                           android:layout_marginEnd="4dp"
                           android:background="@drawable/toolbar_btn_bg"
                           android:text="⚡ 50K TURBO PASTE"
@@ -259,52 +259,153 @@ jobs:
 
                       <Button
                           android:id="@+id/btn_left"
-                          android:layout_width="44dp"
-                          android:layout_height="36dp"
-                          android:layout_marginEnd="4dp"
+                          android:layout_width="40dp"
+                          android:layout_height="34dp"
+                          android:layout_marginEnd="3dp"
                           android:background="@drawable/toolbar_btn_bg"
                           android:text="◀"
                           android:textColor="@color/kb_white" />
 
                       <Button
                           android:id="@+id/btn_right"
-                          android:layout_width="44dp"
-                          android:layout_height="36dp"
+                          android:layout_width="40dp"
+                          android:layout_height="34dp"
+                          android:layout_marginEnd="3dp"
                           android:background="@drawable/toolbar_btn_bg"
                           android:text="▶"
                           android:textColor="@color/kb_white" />
                   </LinearLayout>
               </HorizontalScrollView>
 
-              <FrameLayout
+              <!-- Main Keyboard Keys Container -->
+              <LinearLayout
+                  android:id="@+id/keyboard_keys"
                   android:layout_width="match_parent"
                   android:layout_height="wrap_content"
-                  android:layout_marginTop="2dp">
+                  android:orientation="vertical"
+                  android:layout_marginTop="2dp" />
 
-                  <LinearLayout
-                      android:id="@+id/keyboard_keys"
+              <!-- Full Screen Emoji Panel with Return Button & Category Bar -->
+              <LinearLayout
+                  android:id="@+id/emoji_panel"
+                  android:layout_width="match_parent"
+                  android:layout_height="250dp"
+                  android:orientation="vertical"
+                  android:visibility="gone">
+
+                  <!-- Emoji Category Tabs -->
+                  <HorizontalScrollView
                       android:layout_width="match_parent"
-                      android:layout_height="wrap_content"
-                      android:orientation="vertical" />
+                      android:layout_height="36dp"
+                      android:background="#1F1F23"
+                      android:scrollbars="none">
 
+                      <LinearLayout
+                          android:layout_width="wrap_content"
+                          android:layout_height="match_parent"
+                          android:gravity="center_vertical"
+                          android:orientation="horizontal">
+
+                          <Button
+                              android:id="@+id/cat_faces"
+                              android:layout_width="50dp"
+                              android:layout_height="32dp"
+                              android:background="@android:color/transparent"
+                              android:text="😀"
+                              android:textSize="17sp" />
+
+                          <Button
+                              android:id="@+id/cat_hands"
+                              android:layout_width="50dp"
+                              android:layout_height="32dp"
+                              android:background="@android:color/transparent"
+                              android:text="👍"
+                              android:textSize="17sp" />
+
+                          <Button
+                              android:id="@+id/cat_hearts"
+                              android:layout_width="50dp"
+                              android:layout_height="32dp"
+                              android:background="@android:color/transparent"
+                              android:text="❤️"
+                              android:textSize="17sp" />
+
+                          <Button
+                              android:id="@+id/cat_food"
+                              android:layout_width="50dp"
+                              android:layout_height="32dp"
+                              android:background="@android:color/transparent"
+                              android:text="🍕"
+                              android:textSize="17sp" />
+
+                          <Button
+                              android:id="@+id/cat_objects"
+                              android:layout_width="50dp"
+                              android:layout_height="32dp"
+                              android:background="@android:color/transparent"
+                              android:text="🔥"
+                              android:textSize="17sp" />
+                      </LinearLayout>
+                  </HorizontalScrollView>
+
+                  <!-- Scrollable Emoji Grid -->
                   <ScrollView
-                      android:id="@+id/emoji_panel"
                       android:layout_width="match_parent"
-                      android:layout_height="230dp"
-                      android:visibility="gone">
+                      android:layout_height="0dp"
+                      android:layout_weight="1"
+                      android:background="#161618">
 
                       <GridLayout
                           android:id="@+id/emoji_grid"
                           android:layout_width="match_parent"
                           android:layout_height="wrap_content"
                           android:columnCount="7"
-                          android:padding="6dp" />
+                          android:padding="4dp" />
                   </ScrollView>
-              </FrameLayout>
+
+                  <!-- Bottom Emoji Navigation Bar (ABC Back Button, Space, Del) -->
+                  <LinearLayout
+                      android:layout_width="match_parent"
+                      android:layout_height="45dp"
+                      android:background="#1B1B1E"
+                      android:gravity="center_vertical"
+                      android:orientation="horizontal"
+                      android:padding="3dp">
+
+                      <Button
+                          android:id="@+id/btn_emoji_back_abc"
+                          android:layout_width="0dp"
+                          android:layout_height="38dp"
+                          android:layout_weight="1.8"
+                          android:background="@drawable/key_special_bg"
+                          android:text="ABC"
+                          android:textColor="@color/kb_white"
+                          android:textStyle="bold" />
+
+                      <Button
+                          android:id="@+id/btn_emoji_space"
+                          android:layout_width="0dp"
+                          android:layout_height="38dp"
+                          android:layout_marginHorizontal="4dp"
+                          android:layout_weight="3.2"
+                          android:background="@drawable/key_bg"
+                          android:text="SPACE"
+                          android:textColor="@color/kb_white" />
+
+                      <Button
+                          android:id="@+id/btn_emoji_del"
+                          android:layout_width="0dp"
+                          android:layout_height="38dp"
+                          android:layout_weight="1.5"
+                          android:background="@drawable/key_special_bg"
+                          android:text="DEL"
+                          android:textColor="@color/kb_white" />
+                  </LinearLayout>
+              </LinearLayout>
           </LinearLayout>
           EOF
 
-          # 10. TextEngine.kt
+          # 10. TextEngine.kt (50,000 Lines Chunk Buffer Streamer)
           cat << 'EOF' > app/src/main/java/com/mi/keyboard/TextEngine.kt
           package com.mi.keyboard
 
@@ -359,7 +460,6 @@ jobs:
           import android.widget.Button
           import android.widget.GridLayout
           import android.widget.LinearLayout
-          import android.widget.ScrollView
           import android.widget.TextView
           import androidx.core.content.ContextCompat
           import kotlinx.coroutines.CoroutineScope
@@ -379,17 +479,44 @@ jobs:
               private var isEmojiOpen = false
 
               private var keysLayout: LinearLayout? = null
-              private var emojiPanel: ScrollView? = null
+              private var emojiPanel: LinearLayout? = null
               private var emojiGrid: GridLayout? = null
 
-              private val emojis = listOf(
-                  "😀","😃","😄","😁","😆","😅","😂","🤣","😊","😇","🙂","🙃","😉","😌","😍",
-                  "🥰","😘","😗","😙","😚","😋","😛","😝","😜","🤪","🤨","🧐","🤓","😎","🥳",
-                  "😏","😒","😞","😔","😟","😕","🙁","☹️","😣","😖","😫","😩","🥺","😢","😭",
-                  "😤","😠","😡","🤬","🤯","😳","🥵","🥶","😱","😨","👍","👎","👌","✌️","🤞",
-                  "🤟","🤘","🤙","👈","👉","👆","🖕","👇","☝️","👋","✋","👏","🙌","🫶","🤝",
-                  "🙏","❤️","🧡","💛","💚","💙","💜","🖤","🤍","🤎","💔","🔥","💯","✨","🎉"
+              // Categorized Emoji Collections
+              private val emojiFaces = listOf(
+                  "😀","😃","😄","😁","😆","😅","😂","🤣","🥲","🥹","😊","😇","🙂","🙃","😉",
+                  "😌","😍","🥰","😘","😗","😙","😚","😋","😛","😝","😜","🤪","🤨","🧐","🤓",
+                  "😎","🥸","🤩","🥳","😏","😒","😞","😔","😟","😕","🙁","☹️","😣","😖","😫",
+                  "😩","🥺","😢","😭","😮‍💨","😤","😠","😡","🤬","🤯","😳","🥵","🥶","😱","😨",
+                  "😰","😥","🤤","😴","🥱","😷","🤒","🤕","🤢","🤮","😵","🤐","🥴","🤫","🤭"
               )
+
+              private val emojiHands = listOf(
+                  "👍","👎","👌","✌️","🤞","🫰","🤟","🤘","🤙","👈","👉","👆","🖕","👇","☝️",
+                  "🫵","👋","🤚","🖐️","✋","🖖","👏","🙌","🫶","👐","🤲","🤝","🙏","✍️","💅",
+                  "💪","🦾","🤳","👄","👁️","👀","👂","👃","🦶","🦵","🧠","🫀","🫁","🫂","🧑‍💻"
+              )
+
+              private val emojiHearts = listOf(
+                  "❤️","🧡","💛","💚","💙","💜","🖤","🤍","🤎","💔","❤️‍🔥","❤️‍🩹","❣️","💕","💞",
+                  "💓","💗","💖","💘","💝","💟","💌","☮️","✝️","☪️","🕉️","☸️","✡️","🔯","🕎",
+                  "♈","♉","♊","♋","♌","♍","♎","♏","♐","♑","♒","♓","⛎","⭕","❌","💯"
+              )
+
+              private val emojiFood = listOf(
+                  "🍏","🍎","🍐","🍊","🍋","🍌","🍉","🍇","🍓","🫐","🍈","🍒","🍑","🥭","🍍",
+                  "🥥","🥝","🍅","🥑","🍔","🍟","🍕","🌭","🥪","🌮","🌯","🥗","🍿","🧈","🥞",
+                  "🧇","🧀","🥩","🍗","🍖","🍤","🍣","🍱","🥟","🍜","🍝","🍦","🍧","🍨","🍩",
+                  "🍪","🎂","🍰","🧁","🥧","🍫","🍬","🍭","☕","🍵","🧃","🥤","🍺","🍻","🥂"
+              )
+
+              private val emojiObjects = listOf(
+                  "🔥","✨","🎉","🚀","⚡","⭐","🌟","💡","💻","📱","⌚","🔋","🔌","💵","💰",
+                  "💳","💎","📦","📬","🛍️","🎁","🎈","🎯","🎮","🕹️","🏆","🥇","👑","⚽","🏀",
+                  "🚗","🚕","🏎️","🚓","🚑","✈️","🛳️","🚨","🔔","🔒","🔑","🛠️","⚙️","🔫","🛡️"
+              )
+
+              private var activeEmojiList = emojiFaces
 
               override fun onCreate() {
                   super.onCreate()
@@ -404,7 +531,10 @@ jobs:
                   emojiGrid = root.findViewById(R.id.emoji_grid)
 
                   setupToolbarActions(root)
-                  setupEmojiGrid()
+                  setupEmojiCategoryTabs(root)
+                  setupEmojiBottomBar(root)
+
+                  renderEmojiGrid(activeEmojiList)
                   refreshKeys()
 
                   return root
@@ -439,15 +569,52 @@ jobs:
                   }
               }
 
-              private fun setupEmojiGrid() {
+              private fun setupEmojiCategoryTabs(root: View) {
+                  root.findViewById<Button>(R.id.cat_faces)?.setOnClickListener {
+                      activeEmojiList = emojiFaces
+                      renderEmojiGrid(activeEmojiList)
+                  }
+                  root.findViewById<Button>(R.id.cat_hands)?.setOnClickListener {
+                      activeEmojiList = emojiHands
+                      renderEmojiGrid(activeEmojiList)
+                  }
+                  root.findViewById<Button>(R.id.cat_hearts)?.setOnClickListener {
+                      activeEmojiList = emojiHearts
+                      renderEmojiGrid(activeEmojiList)
+                  }
+                  root.findViewById<Button>(R.id.cat_food)?.setOnClickListener {
+                      activeEmojiList = emojiFood
+                      renderEmojiGrid(activeEmojiList)
+                  }
+                  root.findViewById<Button>(R.id.cat_objects)?.setOnClickListener {
+                      activeEmojiList = emojiObjects
+                      renderEmojiGrid(activeEmojiList)
+                  }
+              }
+
+              private fun setupEmojiBottomBar(root: View) {
+                  // Direct Return to Typing Screen
+                  root.findViewById<Button>(R.id.btn_emoji_back_abc)?.setOnClickListener {
+                      isEmojiOpen = false
+                      refreshKeys()
+                  }
+                  root.findViewById<Button>(R.id.btn_emoji_space)?.setOnClickListener {
+                      currentInputConnection?.commitText(" ", 1)
+                  }
+                  root.findViewById<Button>(R.id.btn_emoji_del)?.setOnClickListener {
+                      currentInputConnection?.deleteSurroundingText(1, 0)
+                  }
+              }
+
+              private fun renderEmojiGrid(list: List<String>) {
                   val grid = emojiGrid ?: return
                   grid.removeAllViews()
-                  for (emo in emojis) {
+                  for (emo in list) {
                       val tv = TextView(this).apply {
                           text = emo
                           textSize = 24f
                           gravity = android.view.Gravity.CENTER
-                          setPadding(12, 12, 12, 12)
+                          setPadding(10, 10, 10, 10)
                           setOnClickListener {
                               currentInputConnection?.commitText(emo, 1)
                           }
@@ -470,8 +637,10 @@ jobs:
                   panel.visibility = View.GONE
                   layout.removeAllViews()
 
+                  // Samsung HD Layout: Fixed Top Number Row + QWERTY
                   val rows = if (!isSymbols) {
                       listOf(
+                          listOf("1","2","3","4","5","6","7","8","9","0"),
                           listOf("q","w","e","r","t","y","u","i","o","p"),
                           listOf("a","s","d","f","g","h","j","k","l"),
                           listOf("CAPS","z","x","c","v","b","n","m","DEL"),
@@ -480,8 +649,8 @@ jobs:
                   } else {
                       listOf(
                           listOf("1","2","3","4","5","6","7","8","9","0"),
-                          listOf("@","#","$","%","&","*","-","+","="),
-                          listOf("(","/",":",";","!","?","\"",")","DEL"),
+                          listOf("@","#","$","%","&","*","-","+","=","/"),
+                          listOf("~","`","<",">","[","]","{","}","DEL"),
                           listOf("ABC","😀","SPACE","ENTER")
                       )
                   }
@@ -498,7 +667,7 @@ jobs:
                       for (k in row) {
                           val btn = Button(this).apply {
                               var label = k
-                              if (!isSymbols && isCaps && k.length == 1) {
+                              if (!isSymbols && isCaps && k.length == 1 && !k.matches(Regex("[0-9]"))) {
                                   label = k.uppercase()
                               }
                               text = label
@@ -519,8 +688,8 @@ jobs:
                                   else -> 1.0f
                               }
 
-                              layoutParams = LinearLayout.LayoutParams(0, 130, weight).apply {
-                                  setMargins(2, 3, 2, 3)
+                              layoutParams = LinearLayout.LayoutParams(0, 126, weight).apply {
+                                  setMargins(2, 2, 2, 2)
                               }
 
                               setOnClickListener { handleKeyClick(k) }
@@ -553,7 +722,7 @@ jobs:
                           refreshKeys()
                       }
                       "😀" -> {
-                          isEmojiOpen = !isEmojiOpen
+                          isEmojiOpen = true
                           refreshKeys()
                       }
                       else -> {
