@@ -82,8 +82,8 @@ jobs:
                   applicationId = "com.mi.keyboard"
                   minSdk = 26
                   targetSdk = 34
-                  versionCode = 8
-                  versionName = "5.0.0-PRO-MAX"
+                  versionCode = 10
+                  versionName = "5.1.0-STABLE"
               }
 
               buildTypes {
@@ -154,7 +154,7 @@ jobs:
           </resources>
           EOF
 
-          # 8. Layout: keyboard_layout.xml (Multi-Panel + OneUI Tiles + Themes)
+          # 8. Layout: keyboard_layout.xml (OneUI Design Architecture)
           cat << 'EOF' > app/src/main/res/layout/keyboard_layout.xml
           <?xml version="1.0" encoding="utf-8"?>
           <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
@@ -164,7 +164,7 @@ jobs:
               android:orientation="vertical"
               android:padding="2dp">
 
-              <!-- Top OneUI Quick Actions Bar -->
+              <!-- OneUI Quick Action Toolbar -->
               <LinearLayout
                   android:id="@+id/top_icon_toolbar"
                   android:layout_width="match_parent"
@@ -239,7 +239,7 @@ jobs:
                       android:textSize="16sp" />
               </LinearLayout>
 
-              <!-- Main QWERTY Panel -->
+              <!-- Panel 1: Main QWERTY Layout -->
               <LinearLayout
                   android:id="@+id/panel_main_keyboard"
                   android:layout_width="match_parent"
@@ -247,7 +247,7 @@ jobs:
                   android:orientation="vertical"
                   android:layout_marginTop="2dp" />
 
-              <!-- OneUI Grid Menu Box Tiles -->
+              <!-- Panel 2: OneUI Grid Menu Box Tiles -->
               <LinearLayout
                   android:id="@+id/panel_tiles_menu"
                   android:layout_width="match_parent"
@@ -407,6 +407,7 @@ jobs:
                           android:gravity="center"
                           android:orientation="vertical">
                           <TextView
+                              android:id="@+id/tv_haptic_icon"
                               android:layout_width="wrap_content"
                               android:layout_height="wrap_content"
                               android:text="📳"
@@ -423,7 +424,7 @@ jobs:
                   </GridLayout>
               </LinearLayout>
 
-              <!-- Clipboard Panel -->
+              <!-- Panel 3: Clipboard Panel -->
               <LinearLayout
                   android:id="@+id/panel_clipboard"
                   android:layout_width="match_parent"
@@ -478,7 +479,7 @@ jobs:
                   </ScrollView>
               </LinearLayout>
 
-              <!-- Text Editing D-Pad Panel -->
+              <!-- Panel 4: Text Editing D-Pad Panel -->
               <LinearLayout
                   android:id="@+id/panel_text_edit"
                   android:layout_width="match_parent"
@@ -584,7 +585,7 @@ jobs:
                       android:textStyle="bold" />
               </LinearLayout>
 
-              <!-- Full Scaled Emoji Panel (Zero Cross-Box Bug) -->
+              <!-- Panel 5: Scaled Verified Emoji Suite -->
               <LinearLayout
                   android:id="@+id/panel_emoji"
                   android:layout_width="match_parent"
@@ -699,7 +700,7 @@ jobs:
           }
           EOF
 
-          # 10. MIKeyboardService.kt (Theme Engine, Gliding, Verified Emojis)
+          # 10. MIKeyboardService.kt (Data Class Architecture, No Overload Ambiguity)
           cat << 'EOF' > app/src/main/java/com/mi/keyboard/MIKeyboardService.kt
           package com.mi.keyboard
 
@@ -724,6 +725,16 @@ jobs:
           import kotlinx.coroutines.Dispatchers
           import kotlinx.coroutines.SupervisorJob
           import kotlinx.coroutines.cancel
+
+          // Data class allows clean destructuring of any number of variables without Kotlin compiler error
+          data class ThemeColors(
+              val bg: Int,
+              val bar: Int,
+              val tile: Int,
+              val keyNormal: Int,
+              val keySpecial: Int,
+              val text: Int
+          )
 
           class MIKeyboardService : InputMethodService() {
 
@@ -853,14 +864,38 @@ jobs:
                   return root
               }
 
+              private fun getThemePalette(): ThemeColors {
+                  return when (currentTheme) {
+                      KeyboardTheme.DARK_AMOLED -> ThemeColors(
+                          0xFF111113.toInt(),
+                          0xFF18181B.toInt(),
+                          0xFF222227.toInt(),
+                          0xFF28282C.toInt(),
+                          0xFF35353B.toInt(),
+                          0xFFFFFFFF.toInt()
+                      )
+                      KeyboardTheme.GBOARD_WHITE -> ThemeColors(
+                          0xFFECEFF1.toInt(),
+                          0xFFDFE4E8.toInt(),
+                          0xFFFFFFFF.toInt(),
+                          0xFFFFFFFF.toInt(),
+                          0xFFCFD8DC.toInt(),
+                          0xFF1A1A1A.toInt()
+                      )
+                      KeyboardTheme.ONEUI_GREY -> ThemeColors(
+                          0xFF24272C.toInt(),
+                          0xFF2B2F36.toInt(),
+                          0xFF333842.toInt(),
+                          0xFF333842.toInt(),
+                          0xFF404652.toInt(),
+                          0xFFFFFFFF.toInt()
+                      )
+                  }
+              }
+
               private fun applyTheme() {
                   val root = rootView ?: return
-
-                  val (bgColor, barColor, tileColor, keyNormalColor, keySpecialColor, textColor) = when (currentTheme) {
-                      KeyboardTheme.DARK_AMOLED -> listOf(0xFF111113.toInt(), 0xFF18181B.toInt(), 0xFF222227.toInt(), 0xFF28282C.toInt(), 0xFF35353B.toInt(), 0xFFFFFFFF.toInt())
-                      KeyboardTheme.GBOARD_WHITE -> listOf(0xFFECEFF1.toInt(), 0xFFDFE4E8.toInt(), 0xFFFFFFFF.toInt(), 0xFFFFFFFF.toInt(), 0xFFCFD8DC.toInt(), 0xFF1A1A1A.toInt())
-                      KeyboardTheme.ONEUI_GREY -> listOf(0xFF24272C.toInt(), 0xFF2B2F36.toInt(), 0xFF333842.toInt(), 0xFF333842.toInt(), 0xFF404652.toInt(), 0xFFFFFFFF.toInt())
-                  }
+                  val (bgColor, barColor, tileColor, keyNormalColor, keySpecialColor, textColor) = getThemePalette()
 
                   root.setBackgroundColor(bgColor)
                   root.findViewById<LinearLayout>(R.id.top_icon_toolbar).setBackgroundColor(barColor)
@@ -872,7 +907,7 @@ jobs:
                   root.findViewById<View>(R.id.emoji_tabs_scroll).setBackgroundColor(barColor)
                   root.findViewById<LinearLayout>(R.id.emoji_bottom_bar).setBackgroundColor(barColor)
 
-                  // Tile boxes styling
+                  // Tile boxes rounded shapes
                   val boxIds = listOf(R.id.box_clipboard, R.id.box_text_edit, R.id.box_turbo_paste, R.id.box_theme, R.id.box_clear, R.id.box_haptic)
                   for (id in boxIds) {
                       root.findViewById<LinearLayout>(id)?.background = createShape(tileColor, 28f)
@@ -904,7 +939,7 @@ jobs:
                   btnEmojiDel.background = createShape(keySpecialColor, 16f)
                   btnEmojiDel.setTextColor(textColor)
 
-                  // Edit Pad Buttons
+                  // Text Edit Pad navigation buttons
                   val editBtns = listOf(R.id.ed_up, R.id.ed_down, R.id.ed_left, R.id.ed_right)
                   for (bId in editBtns) {
                       val b = root.findViewById<Button>(bId)
@@ -1034,12 +1069,7 @@ jobs:
 
               private fun refreshClipboardHistoryList() {
                   clipItemsContainer.removeAllViews()
-                  val textColor = if (currentTheme == KeyboardTheme.GBOARD_WHITE) 0xFF1A1A1A.toInt() else 0xFFFFFFFF.toInt()
-                  val itemBg = when (currentTheme) {
-                      KeyboardTheme.DARK_AMOLED -> 0xFF222227.toInt()
-                      KeyboardTheme.GBOARD_WHITE -> 0xFFFFFFFF.toInt()
-                      KeyboardTheme.ONEUI_GREY -> 0xFF333842.toInt()
-                  }
+                  val (_, _, tileColor, _, _, textColor) = getThemePalette()
 
                   if (clipboardHistory.isEmpty()) {
                       val emptyTv = TextView(this).apply {
@@ -1059,7 +1089,7 @@ jobs:
                               LinearLayout.LayoutParams.MATCH_PARENT,
                               LinearLayout.LayoutParams.WRAP_CONTENT
                           ).apply { setMargins(0, 0, 0, 8) }
-                          background = createShape(itemBg, 18f)
+                          background = createShape(tileColor, 18f)
                           setPadding(14, 12, 14, 12)
                       }
 
@@ -1183,12 +1213,7 @@ jobs:
 
               private fun renderMainKeyboard() {
                   panelMain.removeAllViews()
-
-                  val (keyNormalColor, keySpecialColor, textColor) = when (currentTheme) {
-                      KeyboardTheme.DARK_AMOLED -> listOf(0xFF28282C.toInt(), 0xFF35353B.toInt(), 0xFFFFFFFF.toInt())
-                      KeyboardTheme.GBOARD_WHITE -> listOf(0xFFFFFFFF.toInt(), 0xFFCFD8DC.toInt(), 0xFF1A1A1A.toInt())
-                      KeyboardTheme.ONEUI_GREY -> listOf(0xFF333842.toInt(), 0xFF404652.toInt(), 0xFFFFFFFF.toInt())
-                  }
+                  val (_, _, _, keyNormalColor, keySpecialColor, textColor) = getThemePalette()
 
                   val rows = when {
                       !isSymbols -> listOf(
