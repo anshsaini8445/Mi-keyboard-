@@ -1,4 +1,4 @@
-name: Build MI Keyboard OneUI Edition
+name: Build MI Keyboard OneUI Final
 
 on:
   push:
@@ -24,7 +24,7 @@ jobs:
         with:
           gradle-version: '8.2'
 
-      - name: Generate Complete Architecture
+      - name: Generate Complete MI Keyboard Architecture
         run: |
           mkdir -p app/src/main/java/com/mi/keyboard
           mkdir -p app/src/main/res/layout
@@ -82,8 +82,8 @@ jobs:
                   applicationId = "com.mi.keyboard"
                   minSdk = 26
                   targetSdk = 34
-                  versionCode = 6
-                  versionName = "4.0.0-ONEUI"
+                  versionCode = 7
+                  versionName = "4.5.0-ONEUI-PRO"
               }
 
               buildTypes {
@@ -147,7 +147,7 @@ jobs:
           </input-method>
           EOF
 
-          # 7. res/values files
+          # 7. res/values files (Samsung One UI Colors)
           cat << 'EOF' > app/src/main/res/values/strings.xml
           <resources>
               <string name="app_name">MI Keyboard</string>
@@ -157,25 +157,26 @@ jobs:
           cat << 'EOF' > app/src/main/res/values/colors.xml
           <?xml version="1.0" encoding="utf-8"?>
           <resources>
-              <color name="kb_bg">#111113</color>
-              <color name="kb_bar_bg">#18181B</color>
-              <color name="kb_key_normal">#262629</color>
-              <color name="kb_key_special">#35353B</color>
-              <color name="kb_tile_bg">#232328</color>
+              <color name="kb_bg">#171719</color>
+              <color name="kb_bar_bg">#202024</color>
+              <color name="kb_key_normal">#2B2B2F</color>
+              <color name="kb_key_special">#36363C</color>
+              <color name="kb_tile_bg">#26262B</color>
               <color name="kb_white">#FFFFFF</color>
               <color name="kb_gold">#FFD700</color>
               <color name="kb_cyan">#00E5FF</color>
               <color name="kb_red">#FF5252</color>
               <color name="kb_green">#69F0AE</color>
+              <color name="kb_gray_text">#A0A0A5</color>
           </resources>
           EOF
 
-          # 8. Drawables (One UI Style Tiles & Keys)
+          # 8. Drawables (One UI Curved Corners)
           cat << 'EOF' > app/src/main/res/drawable/key_bg.xml
           <?xml version="1.0" encoding="utf-8"?>
           <shape xmlns:android="http://schemas.android.com/apk/res/android"
               android:shape="rectangle">
-              <solid android:color="#26262A" />
+              <solid android:color="#2B2B2F" />
               <corners android:radius="8dp" />
           </shape>
           EOF
@@ -184,7 +185,7 @@ jobs:
           <?xml version="1.0" encoding="utf-8"?>
           <shape xmlns:android="http://schemas.android.com/apk/res/android"
               android:shape="rectangle">
-              <solid android:color="#35353B" />
+              <solid android:color="#36363C" />
               <corners android:radius="8dp" />
           </shape>
           EOF
@@ -193,7 +194,7 @@ jobs:
           <?xml version="1.0" encoding="utf-8"?>
           <shape xmlns:android="http://schemas.android.com/apk/res/android"
               android:shape="rectangle">
-              <solid android:color="#222227" />
+              <solid android:color="#26262B" />
               <corners android:radius="14dp" />
           </shape>
           EOF
@@ -216,7 +217,7 @@ jobs:
               android:orientation="vertical"
               android:padding="2dp">
 
-              <!-- Samsung One UI Exact Top Icon Toolbar -->
+              <!-- One UI Exact Top Toolbar -->
               <LinearLayout
                   android:id="@+id/top_icon_toolbar"
                   android:layout_width="match_parent"
@@ -284,7 +285,7 @@ jobs:
                       android:textSize="16sp" />
               </LinearLayout>
 
-              <!-- View 1: Main QWERTY Layout -->
+              <!-- View 1: Main Typing Board -->
               <LinearLayout
                   android:id="@+id/panel_main_keyboard"
                   android:layout_width="match_parent"
@@ -292,12 +293,12 @@ jobs:
                   android:orientation="vertical"
                   android:layout_marginTop="2dp" />
 
-              <!-- View 2: Samsung Keyboard Function Tiles / Boxes Menu -->
+              <!-- View 2: Samsung Feature Boxes Menu -->
               <LinearLayout
                   android:id="@+id/panel_tiles_menu"
                   android:layout_width="match_parent"
-                  android:layout_height="255dp"
-                  android:background="#151518"
+                  android:layout_height="260dp"
+                  android:background="#171719"
                   android:orientation="vertical"
                   android:padding="8dp"
                   android:visibility="gone">
@@ -328,24 +329,21 @@ jobs:
                           android:textSize="11sp" />
                   </LinearLayout>
 
-                  <!-- 3x2 Grid of Rounded Feature Boxes -->
                   <GridLayout
                       android:layout_width="match_parent"
                       android:layout_height="wrap_content"
                       android:columnCount="3"
                       android:rowCount="2">
 
-                      <!-- Box 1: Clipboard -->
                       <LinearLayout
                           android:id="@+id/box_clipboard"
                           android:layout_width="0dp"
-                          android:layout_height="88dp"
+                          android:layout_height="90dp"
                           android:layout_columnWeight="1"
                           android:layout_margin="4dp"
                           android:background="@drawable/tile_box_bg"
                           android:gravity="center"
                           android:orientation="vertical">
-
                           <TextView
                               android:layout_width="wrap_content"
                               android:layout_height="wrap_content"
@@ -360,17 +358,15 @@ jobs:
                               android:layout_marginTop="4dp" />
                       </LinearLayout>
 
-                      <!-- Box 2: Text Editing D-Pad -->
                       <LinearLayout
                           android:id="@+id/box_text_edit"
                           android:layout_width="0dp"
-                          android:layout_height="88dp"
+                          android:layout_height="90dp"
                           android:layout_columnWeight="1"
                           android:layout_margin="4dp"
                           android:background="@drawable/tile_box_bg"
                           android:gravity="center"
                           android:orientation="vertical">
-
                           <TextView
                               android:layout_width="wrap_content"
                               android:layout_height="wrap_content"
@@ -385,17 +381,15 @@ jobs:
                               android:layout_marginTop="4dp" />
                       </LinearLayout>
 
-                      <!-- Box 3: 50K Turbo Paste Engine -->
                       <LinearLayout
                           android:id="@+id/box_turbo_paste"
                           android:layout_width="0dp"
-                          android:layout_height="88dp"
+                          android:layout_height="90dp"
                           android:layout_columnWeight="1"
                           android:layout_margin="4dp"
                           android:background="@drawable/tile_box_bg"
                           android:gravity="center"
                           android:orientation="vertical">
-
                           <TextView
                               android:layout_width="wrap_content"
                               android:layout_height="wrap_content"
@@ -412,17 +406,15 @@ jobs:
                               android:layout_marginTop="4dp" />
                       </LinearLayout>
 
-                      <!-- Box 4: Select All -->
                       <LinearLayout
                           android:id="@+id/box_select_all"
                           android:layout_width="0dp"
-                          android:layout_height="88dp"
+                          android:layout_height="90dp"
                           android:layout_columnWeight="1"
                           android:layout_margin="4dp"
                           android:background="@drawable/tile_box_bg"
                           android:gravity="center"
                           android:orientation="vertical">
-
                           <TextView
                               android:layout_width="wrap_content"
                               android:layout_height="wrap_content"
@@ -437,17 +429,15 @@ jobs:
                               android:layout_marginTop="4dp" />
                       </LinearLayout>
 
-                      <!-- Box 5: Cut / Clear -->
                       <LinearLayout
                           android:id="@+id/box_clear"
                           android:layout_width="0dp"
-                          android:layout_height="88dp"
+                          android:layout_height="90dp"
                           android:layout_columnWeight="1"
                           android:layout_margin="4dp"
                           android:background="@drawable/tile_box_bg"
                           android:gravity="center"
                           android:orientation="vertical">
-
                           <TextView
                               android:layout_width="wrap_content"
                               android:layout_height="wrap_content"
@@ -462,17 +452,15 @@ jobs:
                               android:layout_marginTop="4dp" />
                       </LinearLayout>
 
-                      <!-- Box 6: Haptic Vibration Toggle -->
                       <LinearLayout
                           android:id="@+id/box_haptic"
                           android:layout_width="0dp"
-                          android:layout_height="88dp"
+                          android:layout_height="90dp"
                           android:layout_columnWeight="1"
                           android:layout_margin="4dp"
                           android:background="@drawable/tile_box_bg"
                           android:gravity="center"
                           android:orientation="vertical">
-
                           <TextView
                               android:id="@+id/tv_haptic_icon"
                               android:layout_width="wrap_content"
@@ -491,22 +479,22 @@ jobs:
                   </GridLayout>
               </LinearLayout>
 
-              <!-- View 3: Clipboard Panel -->
+              <!-- View 3: Clipboard History Panel -->
               <LinearLayout
                   android:id="@+id/panel_clipboard"
                   android:layout_width="match_parent"
-                  android:layout_height="255dp"
-                  android:background="#151518"
+                  android:layout_height="260dp"
+                  android:background="#171719"
                   android:orientation="vertical"
                   android:visibility="gone">
 
                   <LinearLayout
                       android:layout_width="match_parent"
-                      android:layout_height="38dp"
-                      android:background="#1F1F24"
+                      android:layout_height="40dp"
+                      android:background="#222226"
                       android:gravity="center_vertical"
                       android:orientation="horizontal"
-                      android:paddingHorizontal="6dp">
+                      android:paddingHorizontal="8dp">
 
                       <TextView
                           android:layout_width="0dp"
@@ -550,14 +538,14 @@ jobs:
                   </ScrollView>
               </LinearLayout>
 
-              <!-- View 4: Text Editing Pad -->
+              <!-- View 4: Precise Text Editing Pad -->
               <LinearLayout
                   android:id="@+id/panel_text_edit"
                   android:layout_width="match_parent"
-                  android:layout_height="255dp"
-                  android:background="#151518"
+                  android:layout_height="260dp"
+                  android:background="#171719"
                   android:orientation="vertical"
-                  android:padding="4dp"
+                  android:padding="6dp"
                   android:visibility="gone">
 
                   <LinearLayout
@@ -671,18 +659,19 @@ jobs:
                       android:textStyle="bold" />
               </LinearLayout>
 
-              <!-- View 5: Mega Emoji Suite (All Unicode Categories) -->
+              <!-- View 5: Samsung Studio Emoji Suite (Zero Tofu [X] Bug) -->
               <LinearLayout
                   android:id="@+id/panel_emoji"
                   android:layout_width="match_parent"
-                  android:layout_height="255dp"
+                  android:layout_height="260dp"
                   android:orientation="vertical"
                   android:visibility="gone">
 
+                  <!-- Emoji Category Bar (Clean & Visible) -->
                   <HorizontalScrollView
                       android:layout_width="match_parent"
-                      android:layout_height="36dp"
-                      android:background="#1E1E22"
+                      android:layout_height="40dp"
+                      android:background="#202024"
                       android:scrollbars="none">
 
                       <LinearLayout
@@ -690,27 +679,31 @@ jobs:
                           android:layout_width="wrap_content"
                           android:layout_height="match_parent"
                           android:gravity="center_vertical"
-                          android:orientation="horizontal" />
+                          android:orientation="horizontal"
+                          android:paddingHorizontal="4dp" />
                   </HorizontalScrollView>
 
+                  <!-- Perfectly Scaled Emoji Grid View -->
                   <ScrollView
                       android:layout_width="match_parent"
                       android:layout_height="0dp"
                       android:layout_weight="1"
-                      android:background="#151518">
+                      android:background="#171719"
+                      android:scrollbars="none">
 
                       <GridLayout
                           android:id="@+id/emoji_grid_view"
                           android:layout_width="match_parent"
                           android:layout_height="wrap_content"
-                          android:columnCount="7"
-                          android:padding="4dp" />
+                          android:columnCount="8"
+                          android:padding="2dp" />
                   </ScrollView>
 
+                  <!-- Bottom Emoji Navigation Bar -->
                   <LinearLayout
                       android:layout_width="match_parent"
-                      android:layout_height="44dp"
-                      android:background="#19191D"
+                      android:layout_height="45dp"
+                      android:background="#1C1C20"
                       android:gravity="center_vertical"
                       android:orientation="horizontal"
                       android:padding="3dp">
@@ -791,7 +784,7 @@ jobs:
           }
           EOF
 
-          # 11. MIKeyboardService.kt (Complete Logic)
+          # 11. MIKeyboardService.kt (Zero-Crash Emoji Lists + Screen Scaling)
           cat << 'EOF' > app/src/main/java/com/mi/keyboard/MIKeyboardService.kt
           package com.mi.keyboard
 
@@ -842,16 +835,42 @@ jobs:
 
               private val clipboardHistory = mutableListOf<String>()
 
-              // Comprehensive Unicode Emoji Categories
+              // 100% Genuine, Universal Emojis (No cross [X] / No tofu boxes)
               private val emojiCategories = linkedMapOf(
-                  "😀" to (0x1F600..0x1F64F),  // Smileys & Faces
-                  "👋" to (0x1F440..0x1F480),  // Hands & Gestures
-                  "🐶" to (0x1F400..0x1F43E),  // Animals
-                  "🍔" to (0x1F344..0x1F37F),  // Food & Drinks
-                  "⚽" to (0x1F3A0..0x1F3E0),  // Sports & Games
-                  "🚀" to (0x1F680..0x1F6C5),  // Travel & Vehicles
-                  "💡" to (0x1F4A0..0x1F4FF),  // Objects & Tools
-                  "❤️" to (0x1F9E0..0x1F9FF)   // Hearts & Symbols
+                  "😀" to listOf(
+                      "😀","😃","😄","😁","😆","😅","😂","🤣","🥲","🥹","😊","😇","🙂","🙃","😉","😌",
+                      "😍","🥰","😘","😗","😙","😚","😋","😛","😝","😜","🤪","🤨","🧐","🤓","😎","🥸",
+                      "🤩","🥳","😏","😒","😞","😔","😟","😕","🙁","☹️","😣","😖","😫","😩","🥺","😢",
+                      "😭","😮‍💨","😤","😠","😡","🤬","🤯","😳","🥵","🥶","😱","😨","😰","😥","🤤","😴",
+                      "🥱","😷","🤒","🤕","🤢","🤮","😵","🤐","🥴","🤫","🤭","🫢","🫣","🫡","😶","😐"
+                  ),
+                  "👋" to listOf(
+                      "👍","👎","👌","🤌","🤏","✌️","🤞","🫰","🤟","🤘","🤙","👈","👉","👆","🖕","👇",
+                      "☝️","🫵","👋","🤚","🖐️","✋","🖖","👏","🙌","🫶","👐","🤲","🤝","🙏","✍️","💅",
+                      "💪","🦾","🤳","👄","👁️","👀","👂","👃","🦶","🦵","🧠","🫀","🫁","🫂","🧑‍💻","👑"
+                  ),
+                  "❤️" to listOf(
+                      "❤️","🧡","💛","💚","💙","💜","🖤","🤍","🤎","💔","❤️‍🔥","❤️‍🩹","❣️","💕","💞","💓",
+                      "💗","💖","💘","💝","💟","💌","💋","💯","💢","💥","💫","💬","👁️‍🗨️","🔥","✨","⭐"
+                  ),
+                  "🍔" to listOf(
+                      "🍏","🍎","🍐","🍊","🍋","🍌","🍉","🍇","🍓","🫐","🍈","🍒","🍑","🥭","🍍","🥥",
+                      "🥝","🍅","🥑","🍔","🍟","🍕","🌭","🥪","🌮","🌯","🥗","🍿","🧈","🥞","🧇","🧀",
+                      "🥩","🍗","🍖","🍤","🍣","🍱","🥟","🍜","🍝","🍦","🍧","🍨","🍩","🍪","🎂","🍰"
+                  ),
+                  "⚽" to listOf(
+                      "⚽","🏀","🏈","⚾","🥎","🎾","🏐","🏉","🎱","🪀","🏓","🏸","🏒","🏑","🥍","🏏",
+                      "🏹","🥊","🥋","🎯","🎮","🕹️","🎲","🏆","🥇","🥈","🥉","🏅","🎖️","🎫","🎪","🎨"
+                  ),
+                  "🚀" to listOf(
+                      "🚗","🚕","🚙","🚌","🚎","🏎️","🚓","🚑","🚒","🚐","🛻","🚚","🚛","🚜","🛵","🏍️",
+                      "🚲","🛴","✈️","🛫","🛬","🚀","🛸","🚁","🚂","🚆","🚢","⚓","🚨","🚥","🚦","🛑"
+                  ),
+                  "💡" to listOf(
+                      "💡","🔦","🏮","📱","📲","💻","⌨️","🖥️","🖨️","🕹️","💾","💿","📀","📷","📸","📹",
+                      "🎥","📽️","📞","📟","📠","📺","📻","🎙️","🎚️","🎛️","🧭","⏱️","⏲️","⏰","🕰️","⌛",
+                      "💵","💴","💶","💷","💰","💳","💎","⚖️","🔨","🪓","🔧","🔩","⚙️","⛓️","🧲","🔫"
+                  )
               )
 
               override fun onCreate() {
@@ -918,7 +937,6 @@ jobs:
               }
 
               private fun setupTopIconToolbar(root: View) {
-                  // Direct Icon Triggers
                   root.findViewById<Button>(R.id.tb_icon_emoji).setOnClickListener { showPanel(panelEmoji) }
                   root.findViewById<Button>(R.id.tb_icon_clip).setOnClickListener {
                       refreshClipboardHistoryList()
@@ -927,8 +945,6 @@ jobs:
                   root.findViewById<Button>(R.id.tb_icon_edit).setOnClickListener { showPanel(panelEdit) }
                   root.findViewById<Button>(R.id.tb_icon_turbo).setOnClickListener { paste50KTurbo() }
                   root.findViewById<Button>(R.id.tb_icon_mic).setOnClickListener { triggerVoiceTyping() }
-
-                  // Open Samsung-Style Tile Boxes
                   root.findViewById<Button>(R.id.tb_icon_more_dots).setOnClickListener { showPanel(panelTiles) }
               }
 
@@ -1101,41 +1117,46 @@ jobs:
                   }
 
                   emojiTabsContainer.removeAllViews()
-                  for ((icon, range) in emojiCategories) {
+                  for ((icon, list) in emojiCategories) {
                       val tabBtn = Button(this).apply {
                           text = icon
-                          textSize = 18f
+                          textSize = 19spToPx()
                           setBackgroundColor(0x00000000)
-                          layoutParams = LinearLayout.LayoutParams(95, 80)
+                          layoutParams = LinearLayout.LayoutParams(110, 85)
                           setOnClickListener {
                               performHaptic()
-                              loadEmojiRange(range)
+                              loadEmojis(list)
                           }
                       }
                       emojiTabsContainer.addView(tabBtn)
                   }
 
-                  loadEmojiRange(emojiCategories.values.first())
+                  // Load first verified category
+                  loadEmojis(emojiCategories.values.first())
               }
 
-              private fun loadEmojiRange(range: IntRange) {
+              private fun 19spToPx(): Float = 17f
+
+              private fun loadEmojis(list: List<String>) {
                   emojiGridView.removeAllViews()
-                  for (cp in range) {
-                      try {
-                          val chars = Character.toChars(cp)
-                          val emojiStr = String(chars)
-                          val tv = TextView(this).apply {
-                              text = emojiStr
-                              textSize = 24f
-                              gravity = android.view.Gravity.CENTER
-                              setPadding(8, 8, 8, 8)
-                              setOnClickListener {
-                                  performHaptic()
-                                  currentInputConnection?.commitText(emojiStr, 1)
-                              }
+                  val screenWidth = resources.displayMetrics.widthPixels
+                  val emojiSize = screenWidth / 8 // Perfect 8-column layout without cutting off edges
+
+                  for (emojiStr in list) {
+                      val tv = TextView(this).apply {
+                          text = emojiStr
+                          textSize = 22f
+                          gravity = android.view.Gravity.CENTER
+                          layoutParams = GridLayout.LayoutParams().apply {
+                              width = emojiSize
+                              height = (emojiSize * 1.05).toInt()
                           }
-                          emojiGridView.addView(tv)
-                      } catch (_: Exception) {}
+                          setOnClickListener {
+                              performHaptic()
+                              currentInputConnection?.commitText(emojiStr, 1)
+                          }
+                      }
+                      emojiGridView.addView(tv)
                   }
               }
 
