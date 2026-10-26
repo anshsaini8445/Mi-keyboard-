@@ -9,5 +9,5 @@
     <subtype
         android:imeSubtypeLocale="ur_PK"
         android:imeSubtypeMode="keyboard"
-        android:label="اردو" />
+        android:label="Urdu" />
 </input-method>
